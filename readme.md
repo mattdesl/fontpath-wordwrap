@@ -1,4 +1,4 @@
-A basic greedy word-wrapper based on LibGDX bitmap font rendering. Uses fontpath-glyph-iterator to lay out the glyphs and determine their visible widths. 
+A basic greedy word-wrapper based on LibGDX bitmap font rendering. Uses [fontpath-glyph-iterator](https://github.com/mattdesl/fontpath-glyph-iterator) to lay out the glyphs and determine their visible widths. 
 
 # usage
 
@@ -40,21 +40,33 @@ This will add new Line objects onto the stack; so you may want to `empty()` the 
 ### `wrap.clearLayout( glyphIterator )`
 Clears the `lines` array to zero. Then, if the current text is not empty, a single Line will be added for the entire string (i.e. no word-wrapping or line breaking).
 
-### `wrap.mode```
+### `wrap.mode`
 
-Wordwrap mode, a string. One of:
+Wordwrap mode, a string. Default `normal`. One of:
 
 - `WordWrap.Mode.NORMAL` or `"normal"` - wraps to a specified width, breaks on newlines, and collapses whitespace 
 - `WordWrap.Mode.PRE` or `"pre"` - preserves whitespace, breaks on newlines
 - `WordWrap.Mode.NOWRAP` or `"nowrap"` - breaks on newlines and collapses whitespace, otherwise doesn't break
 
+### `wrap.getMaxLineWidth()`
+
+A convenience method to return the maximum width of all current lines. Useful for text alignment.
+
+### `wrap.clip`
+
+A boolean (default false) that specifies whether to "clip" the glyphs to the specified wrapWidth, to avoid them overflowing out of the desired text box. This only applies to `pre` and `nowrap` modes.
+
 # example
 
-See [fontpath-canvas]() for an implementation of this wordwrapper. 
+See [fontpath-canvas](https://github.com/mattdesl/fontpath-canvas) for a more complete implementation of this word-wrapper. 
 
-The following screenshot shows a single String which has been layed out with two different modes: 'normal' (first paragraph), and 'pre' (second paragraph). The gray border shows the wrap width for the first paragraph. The text was rendered with paths in 2D Canvas.
+The following screenshot shows a single string which has been layed out with two different modes: 'normal' (first paragraph), and 'pre' (second paragraph). The gray border shows the wrap width being used. This text was rendered with paths in 2D Canvas.
 
 ![Output](http://i.imgur.com/jgLZl64.png)
+
+Here is the same string, with `clip` enabled and a smaller `wrapWidth`.
+
+![Out2](http://i.imgur.com/bSE94lQ.png)
 
 # Roadmap
 

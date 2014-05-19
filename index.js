@@ -15,7 +15,16 @@ function idxOf(text, chr, start, end) {
 }
 
 function WordWrap(text) {
+	/**
+	 * The text being operated on.
+	 * @param {String} text
+	 */
 	this.text = text||"";
+
+	/**
+	 * An array of lines representing the state of this word wrapper.
+	 * @param {Array} lines
+	 */
 	this.lines = [];
 
 	/** 
@@ -24,6 +33,22 @@ function WordWrap(text) {
 	 */
 	this.newline = '\n';
 
+	/**
+	 * Whether to clip non-breaking text (nowrap and pre)
+	 * if the wrapWidth is too small. 
+	 *  
+	 * @param {Boolean} clip
+	 */
+	this.clip = false;
+
+	/**
+	 * The mode for wordwrapping: 'pre', 'normal', or 'nowrap'.
+	 *
+	 * You can also use the `PRE`, `NORMAL`, and `NOWRAP` constants
+	 * in `WordWrap.Mode`.
+	 * 
+	 * @param {String} mode
+	 */
 	this.mode = WordWrap.Mode.NORMAL;
 }
 
@@ -36,7 +61,8 @@ WordWrap.Mode = {
 /**
  * Clears any multi-line layout by placing all the text in a single Line object.
  * 
- * @param  {GlyphIterator} iterator the iterator to use 
+ * @param {GlyphIterator} iterator the iterator to use 
+ * @method  clearLayout
  */
 WordWrap.prototype.clearLayout = function(iterator) {
 	this.lines.length = 0;
@@ -51,13 +77,14 @@ WordWrap.prototype.clearLayout = function(iterator) {
 
 /**
  * Resets the word wrapper by emptying all current lines.
+ * @method  empty
  */
 WordWrap.prototype.empty = function() {
 	this.lines.length = 0;
 };
 
 /**
- * Word-wraps 
+ * Word-wraps the given text into multiple lines.
  * @param  {[type]} iterator [description]
  * @param  {[type]} width    [description]
  * @param  {[type]} start    [description]
@@ -75,7 +102,7 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 	iterator.begin();
 
 	//default wrap width...
-	wrapWidth = wrapWidth===0 || wrapWidth ? wrapWidth : Number.MAX_VALUE;
+	wrapWidth = (wrapWidth===0 || wrapWidth) ? wrapWidth : Number.MAX_VALUE;
 
 	//<pre> mode just uses a simple algorithm...
 	if (this.mode === WordWrap.Mode.PRE) {
@@ -86,8 +113,9 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 			//If we've reached a newline, then step down a line
 			//Or if we've reached the EOF
 			if ( chr === this.newline || i===end-1) {
-				iterator.getBounds(text, lineStart, i+1, undefined, tmpBounds);
-				lines.push( new WordWrap.Line(lineStart, i+1, tmpBounds.width) );
+				var availableWidth = this.clip ? wrapWidth : undefined;
+				iterator.getBounds(text, lineStart, i+1, availableWidth, tmpBounds);
+				lines.push( new WordWrap.Line(lineStart, lineStart+tmpBounds.glyphs, tmpBounds.width) );
 				lineStart = i+1;
 			}
 		}
@@ -96,8 +124,10 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 	//https://github.com/libgdx/libgdx/blob/master/gdx/src/com/badlogic/gdx/graphics/g2d/BitmapFontCache.java
 	else {
 		//if 'nowrap' is specified, we only wrap on newline chars
+		
+		var testWidth = wrapWidth;
 		if (this.mode === WordWrap.Mode.NOWRAP) {
-			wrapWidth = Number.MAX_VALUE;
+			testWidth = Number.MAX_VALUE;
 		}
 
 		while (start < end) {
@@ -112,7 +142,7 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 			}
 
 			//determine visible # of glyphs for the available width
-			iterator.getBounds(text, start, newLine, wrapWidth, tmpBounds)
+			iterator.getBounds(text, start, newLine, testWidth, tmpBounds)
 
 			var lineEnd = start + tmpBounds.glyphs;
 			var nextStart = lineEnd + this.newline.length;
@@ -140,10 +170,13 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 			}
 
 			if (lineEnd > start) {
-				iterator.getBounds(text, start, lineEnd, undefined, tmpBounds);
+				//to clip, use the original wrap width (unaltered by mode)
+				var availableWidth = this.clip ? wrapWidth : undefined;
+				iterator.getBounds(text, start, lineEnd, availableWidth, tmpBounds);
 				var lineWidth = tmpBounds.width;
 
-				lines.push( new WordWrap.Line(start, lineEnd, lineWidth) );
+				var rLineEnd = this.clip ? start+tmpBounds.glyphs : lineEnd;
+				lines.push( new WordWrap.Line(start, rLineEnd, lineWidth) );
 			}
 			start = nextStart;
 
@@ -153,6 +186,13 @@ WordWrap.prototype.layout = function(iterator, wrapWidth, start, end) {
 	iterator.end();
 };
 
+/**
+ * A convenience method to return the maximum width of all current lines.
+ * This is useful for aligning blocks of text.
+ *
+ * @method  getMaxLineWidth
+ * @return {Number} the maximum width of all lines
+ */
 WordWrap.prototype.getMaxLineWidth = function() {
 	var maxWidth = 0;
 	for (var i=0; i<this.lines.length; i++) {
@@ -162,6 +202,15 @@ WordWrap.prototype.getMaxLineWidth = function() {
 	return maxWidth;
 };
 
+/**
+ * The Line object holds the start and end indices into the string,
+ * and the width as computed by GlyphIterator.
+ * 
+ * @class  WordWrap.Line
+ * @param {Number} start the start index, inclusive
+ * @param {Number} end   the end index, exclusive
+ * @param {Number} width the computed width of this line
+ */
 WordWrap.Line = function(start, end, width) {
 	this.start = start;
 	this.end = end;
