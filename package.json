@@ -1,6 +1,6 @@
 {
   "name": "fontpath-wordwrap",
-  "version": "0.0.0",
+  "version": "1.0.0",
   "description": "simple word-wrapping tools for fontpath",
   "main": "index.js",
   "scripts": {
@@ -30,5 +30,8 @@
   "bugs": {
     "url": "https://github.com/mattdesl/fontpath-wordwrap/issues"
   },
-  "homepage": "https://github.com/mattdesl/fontpath-wordwrap"
+  "homepage": "https://github.com/mattdesl/fontpath-wordwrap",
+  "dependencies": {
+    "word-wrapper": "^1.0.7"
+  }
 }

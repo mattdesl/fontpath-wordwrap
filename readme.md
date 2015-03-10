@@ -52,10 +52,6 @@ Wordwrap mode, a string. Default `normal`. One of:
 
 A convenience method to return the maximum width of all current lines. Useful for text alignment.
 
-### `wrap.clip`
-
-A boolean (default false) that specifies whether to "clip" the glyphs to the specified wrapWidth, to avoid them overflowing out of the desired text box. This only applies to `pre` and `nowrap` modes.
-
 # example
 
 See [fontpath-canvas](https://github.com/mattdesl/fontpath-canvas) for a more complete implementation of this word-wrapper. 
@@ -64,7 +60,7 @@ The following screenshot shows a single string which has been layed out with two
 
 ![Output](http://i.imgur.com/jgLZl64.png)
 
-Here is the same string, with `clip` enabled and a smaller `wrapWidth`.
+Here is the same string, with a smaller `wrapWidth`. Notice the `pre` block is clipped when `wrapWidth` is provided.
 
 ![Out2](http://i.imgur.com/bSE94lQ.png)
 
