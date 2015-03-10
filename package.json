@@ -1,6 +1,6 @@
 {
   "name": "fontpath-wordwrap",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "simple word-wrapping tools for fontpath",
   "main": "index.js",
   "scripts": {
